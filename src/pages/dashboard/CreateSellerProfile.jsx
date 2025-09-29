@@ -76,7 +76,7 @@ const CreateSellerProfile = () => {
             </p>
             <p className="flex justify-between my-4 font-bold">
               Payment Total:{" "}
-              <span>{formatUnits(info.payment)} ETH</span>
+              <span>{formatUnits(info.payment)} U2U</span>
             </p>
             {info.address && address && info.address.toLowerCase() === address.toLowerCase() && (
               <div className="mt-4">

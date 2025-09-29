@@ -55,7 +55,7 @@ const MarketplaceDetails = () => {
                 {transaction.name}
               </h3>
               <p className="font-titiliumweb mb-4 font-bold text-[#0C3B45] lg:text-[24px] md:text-[24px] text-[20px]">
-                {formatUnits(transaction.price)} ETH(per unit of measure){" "}
+                {formatUnits(transaction.price)} U2U(per unit of measure){" "}
               </p>
               <p className="flex justify-between my-4">
                 Quantity available: <span>{Number(transaction.weight)}</span>

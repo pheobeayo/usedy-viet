@@ -150,7 +150,7 @@ const BuyProduct = ({ id, price }) => {
                 Price per item:
               </label>
               <div className="text-white bg-[#2E343A] rounded-lg p-4 border border-white/50">
-                {price} ETH
+                {price} U2U
               </div>
             </div>
 
