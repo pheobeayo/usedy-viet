@@ -7,18 +7,17 @@ import { ErrorDecoder } from "ethers-decode-error";
 import abi from "../constants/abi.json";
 import { useProduct } from "../context/ContextProvider";
 
-const useAddProduct = () => {
+const useApprovePayment = () => {
   const contract = useContractInstance(true);
   const { address } = useAppKitAccount();
   const { chainId } = useAppKitNetwork();
   const errorDecoder = ErrorDecoder.create([abi]);
+  const { refreshBalance } = useProduct();
 
-  const { refreshProducts, refreshBalance } = useProduct(); 
-
-  const addProduct = useCallback(
-    async (productName, imageUrl, productDesc, amount, productWeight) => {
-      if (!productName || !imageUrl || !productDesc || !amount || !productWeight) {
-        toast.error("Invalid input!");
+  const approvePayment = useCallback(
+    async (productId) => {
+      if (!productId) {
+        toast.error("Invalid product ID!");
         return;
       }
 
@@ -38,33 +37,33 @@ const useAddProduct = () => {
       }
 
       try {
-        const tx = await contract.listProduct(
-          productName,
-          imageUrl,
-          productDesc,
-          amount,
-          productWeight
-        );
+        const tx = await contract.approvePayment(productId);
         const receipt = await tx.wait();
 
         if (receipt.status === 1) {
-          toast.success("Product listed successfully. UTN has been minted to you");
-          refreshProducts(); 
-          refreshBalance();
+          toast.success("Payment approved successfully! UTN has been minted to you");
+          // Refresh balance after successful approval
+          if (refreshBalance) {
+            refreshBalance();
+          }
+          return true;
         } else {
-          toast.error("Failed to list product");
+          toast.error("Failed to approve payment");
+          return false;
         }
       } catch (err) {
         const decodedError = await errorDecoder.decode(err);
-        toast.error(`Failed to List Product - ${decodedError.reason}`, {
+        toast.error(`Failed to approve payment - ${decodedError.reason}`, {
           position: "top-center",
         });
+        console.error("Approve payment error:", err);
+        return false;
       }
     },
-    [contract, address, chainId, refreshProducts, refreshBalance]
+    [contract, address, chainId, refreshBalance]
   );
 
-  return addProduct;
+  return approvePayment;
 };
 
-export default useAddProduct;
+export default useApprovePayment;

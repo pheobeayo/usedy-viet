@@ -11,6 +11,7 @@ import { ultraNebulaTestnet } from "../connection/index";
 import { ErrorDecoder } from "ethers-decode-error";
 import abi from "../constants/abi.json";
 import { ethers, Contract, formatUnits } from "ethers";
+import { useProduct } from "../context/ContextProvider";
 
 const style = {
   position: "absolute",
@@ -37,6 +38,7 @@ const BuyProduct = ({ id, price }) => {
   const { chainId } = useAppKitNetwork();
   const errorDecoder = ErrorDecoder.create([abi]);
   const { walletProvider } = useAppKitProvider("eip155");
+  const { refreshBalance } = useProduct();
 
   const totalAmount = useMemo(() => {
     if (!amount || !price || isNaN(Number(amount)) || Number(amount) <= 0) {
@@ -98,6 +100,10 @@ const BuyProduct = ({ id, price }) => {
           toast.success("Product purchase successful!", {
             position: "top-center",
           });
+          // Refresh UTN balance after successful purchase
+          if (refreshBalance) {
+            refreshBalance();
+          }
         } else {
           toast.error("Product purchase failed", {
             position: "top-center",
@@ -114,7 +120,7 @@ const BuyProduct = ({ id, price }) => {
         setOpen(false);
       }
     },
-    [address, chainId, walletProvider, price, errorDecoder]
+    [address, chainId, walletProvider, price, errorDecoder, refreshBalance]
   );
 
   return (

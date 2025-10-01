@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import useContractInstance from "../hooks/useContractInstance";
 import useContractEvent from "../hooks/useContractevents";
 import { useAppKitAccount, useAppKitProvider } from "@reown/appkit/react";
+import useGetUsedyToken from "../hooks/useGetUsedyToken";
+import useGetPendingPayments from "../hooks/useGetPendingPayments";
+import useGetApprovedPayments from "../hooks/useGetApprovedPayments";
 
 // Create the context
 const ProductContext = createContext();
@@ -11,6 +14,9 @@ export const ContextProvider = ({ children }) => {
   const contract = useContractInstance(true);
   const { isConnected, address } = useAppKitAccount();
   const { walletProvider } = useAppKitProvider("eip155");
+  const { userBal, refreshBalance } = useGetUsedyToken();
+  const { refetchPendingPayments } = useGetPendingPayments();
+  const { refetchApprovedPayments } = useGetApprovedPayments();
 
   const [products, setProducts] = useState([]);
   const [sellers, setSellers] = useState([]);
@@ -90,11 +96,27 @@ export const ContextProvider = ({ children }) => {
   }, [isConnected, walletProvider, contract]);
 
   // 🔥 Auto-refresh on blockchain events
-  useContractEvent(contract, "ProductListed", refreshProducts);
+  useContractEvent(contract, "ProductListed", () => {
+    refreshProducts();
+    refreshBalance(); // Refresh balance when product is listed
+  });
   useContractEvent(contract, "ProductUpdated", refreshProducts);
   useContractEvent(contract, "ProfileCreated", refreshSellers);
   useContractEvent(contract, "ProfileUpdated", refreshSellers);
-  useContractEvent(contract, "ProductBought", refreshPurchase)
+  useContractEvent(contract, "ProductBought", () => {
+    refreshPurchase();
+    refreshBalance(); // Refresh balance when product is bought
+    if (refetchPendingPayments) refetchPendingPayments(); // Refresh pending payments
+  });
+  useContractEvent(contract, "PaymentApproved", () => {
+    refreshBalance(); // Refresh balance when payment is approved
+    if (refetchPendingPayments) refetchPendingPayments(); // Refresh pending payments
+    if (refetchApprovedPayments) refetchApprovedPayments(); // Refresh approved payments
+  });
+  useContractEvent(contract, "PaymentApproved", () => {
+    refreshPurchase();
+    refreshBalance(); // Refresh balance when payment is approved
+  });
 
   return (
     <ProductContext.Provider
@@ -107,6 +129,10 @@ export const ContextProvider = ({ children }) => {
         sellers,
         setSellers,
         refreshSellers,
+        userBal,
+        refreshBalance,
+        refetchPendingPayments,
+        refetchApprovedPayments,
       }}
     >
       {children}

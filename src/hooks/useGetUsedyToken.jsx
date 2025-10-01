@@ -19,7 +19,7 @@ const useGetUsedyToken = () => {
     refreshBalance();
   }, [refreshBalance]);
 
-  return { userBal, refreshBalance };
+  return { userBal, refreshBalance, refetch: refreshBalance };
 };
 
 export default useGetUsedyToken;

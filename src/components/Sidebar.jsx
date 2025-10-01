@@ -9,18 +9,18 @@ import { useEffect, useRef } from "react";
 import logo from "../assets/whitelogo.svg";
 import { useDisconnect } from "@reown/appkit/react";
 import { useAppKitAccount } from "@reown/appkit/react";
-import useGetUsedyToken from "../hooks/useGetUsedyToken";
+import { useProduct } from "../context/ContextProvider";
 import { formatUnits } from "ethers";
 
 const Sidebar = () => {
   const { disconnect } = useDisconnect();
   const { address, isConnected } = useAppKitAccount();
-  const { userBal, refetch } = useGetUsedyToken();
+  const { userBal, refreshBalance } = useProduct();
   const intervalRef = useRef(null);
 
   // Auto-refresh UTN balance every 30 seconds
   useEffect(() => {
-    if (isConnected && address && refetch) {
+    if (isConnected && address && refreshBalance) {
       // Clear any existing interval
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -28,7 +28,7 @@ const Sidebar = () => {
 
       // Set up new interval for balance updates
       intervalRef.current = setInterval(() => {
-        refetch();
+        refreshBalance();
       }, 30000); // 30 seconds
 
       // Cleanup on unmount or dependency change
@@ -38,12 +38,12 @@ const Sidebar = () => {
         }
       };
     }
-  }, [isConnected, address, refetch]);
+  }, [isConnected, address, refreshBalance]);
 
   // Manual refresh function for immediate updates
   const handleRefreshBalance = () => {
-    if (refetch) {
-      refetch();
+    if (refreshBalance) {
+      refreshBalance();
     }
   };
 

@@ -2,8 +2,6 @@ import AllRoutes from "./config/AllRoutes"
 import './connection/index'
 
 
-
-
 function App() {
 
   return (

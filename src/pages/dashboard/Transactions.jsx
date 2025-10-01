@@ -10,24 +10,43 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import emptyCart from "../../assets/cart.png";
 import { formatUnits } from "ethers";
+import ApprovePayment from "../../components/ApprovePayment";
+import useGetPendingPayments from "../../hooks/useGetPendingPayments";
+import useGetApprovedPayments from "../../hooks/useGetApprovedPayments";
 
 const Transactions = () => {
   const navigate = useNavigate();
   const { address } = useAppKitAccount();
   const { products, sellers, purchaseId } = useProduct();
+  const { pendingPayments, loading: pendingLoading, refetchPendingPayments } = useGetPendingPayments();
+  const { approvedPayments, loading: approvedLoading, refetchApprovedPayments } = useGetApprovedPayments();
   const [value, setValue] = useState("1");
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
-  const [buyerAddress, setBuyerAddress] = useState(address || "");
   const userSeller = address
-  ? sellers.find(
-      (data) => data?.address?.toLowerCase() === address.toLowerCase()
-    )
-  : null;
-  const userPurchase = products.find((item) => item.id === Number(purchaseId));
+    ? sellers.find(
+        (data) => data?.address?.toLowerCase() === address.toLowerCase()
+      )
+    : null;
+
+  // Get products that are pending approval
+  const pendingProducts = products.filter(product => 
+    pendingPayments.includes(product.id)
+  );
+
+  // Get products that have been approved
+  const approvedProducts = products.filter(product => 
+    approvedPayments.includes(product.id)
+  );
+
+  const handlePaymentApproved = () => {
+    // Refresh both pending and approved payments lists
+    refetchPendingPayments();
+    refetchApprovedPayments();
+  };
 
   return (
     <main>
@@ -75,68 +94,87 @@ const Transactions = () => {
         <TabContext value={value}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
             <TabList onChange={handleChange} aria-label="lab API tabs example">
-              <Tab label="Purchased Items" value="1" />
+              <Tab label="Pending Approval" value="1" />
               <Tab label="Approved Items" value="2" />
             </TabList>
           </Box>
           <TabPanel value="1">
-            <section className="text-[#0F160F] flex lg:flex-row md:flex-row flex-col justify-between">
-              {purchaseId?.length === 0 ? (
+            <section className="text-[#0F160F]">
+              <h3 className="text-lg font-bold mb-4">Items Pending Payment Approval</h3>
+              {pendingLoading ? (
+                <div className="flex justify-center items-center p-8">
+                  <p>Loading pending payments...</p>
+                </div>
+              ) : pendingProducts?.length === 0 ? (
                 <div className="flex flex-col items-center w-full text-[rgb(15,22,15)]">
                   <img src={emptyCart} alt="" />
-                  <p>No purchase yet</p>
+                  <p>No items pending approval</p>
                 </div>
               ) : (
-                <div className="border p-4 mb-4 rounded-lg shadow-md lg:w-[32%] md:w-[32%] w-[100%]">
-                  <div>
-                    <img
-                      src={userPurchase.image}
-                      alt=""
-                      className="w-[300px] h-[300px] mb-4"
-                    />
-                    <p>
-                      <strong>Product Name:</strong> {userPurchase.name}
-                    </p>
-                    <p className="flex justify-between my-4 font-bold truncate">
-                      Price <span>{formatUnits(userPurchase.price)}ETH</span>{" "}
-                    </p>
-                  </div>
-
-                  {/* : (
-                <p>Product details not available.</p>
-              )} */}
-                  {/* {approved?.map((item) => {
-        return item.address !== address ? (
-          <ApprovePayment key={item.id} id={p.id} index={index} />
-        ) : null;
-      })} */}
+                <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+                  {pendingProducts.map((product) => (
+                    <div key={product.id} className="border p-4 mb-4 rounded-lg shadow-md">
+                      <div>
+                        <img
+                          src={product?.image || "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"}
+                          alt={product?.name}
+                          className="w-full h-[200px] object-cover mb-4 rounded"
+                        />
+                        <p className="font-bold text-lg mb-2">{product?.name || "N/A"}</p>
+                        <p className="text-gray-600 mb-2">{product?.location || "Unknown location"}</p>
+                        <p className="flex justify-between my-4 font-bold">
+                          Price per kg: <span>{product?.price ? formatUnits(product.price) : "0.00"} U2U</span>
+                        </p>
+                        <p className="text-sm text-gray-500 mb-4">
+                          Status: <span className="text-orange-600 font-semibold">Pending Approval</span>
+                        </p>
+                        <ApprovePayment 
+                          productId={product.id} 
+                          onSuccess={handlePaymentApproved}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>
           </TabPanel>
           <TabPanel value="2">
-            {/* <section className="text-[#0F160F] flex lg:flex-row md:flex-row flex-col justify-between">
-    {approved?.length === 0 ? (
-      <div className="flex flex-col items-center w-full text-[rgb(15,22,15)]">
-          <img src={emptyPurchase} alt="" />
-          <p>No Approved Payment yet</p>
-          </div>
-        ) : (approved.map((p, index) => {
-          const userApproval = allProduct.find((data) => data?.id === p.id);
-          return (
-            <div key={index} className="border p-4 mb-4 rounded-lg shadow-md lg:w-[32%] md:w-[32%] w-[100%]">
-              {userApproval ? (
-                <div>
-                  <img src={userApproval.image} alt="" className="w-[300px] h-[300px] mb-4" />
-                  <p className='flex justify-between my-4 font-bold'>Price <span>{formatUnits(userApproval.price)}ETH</span> </p>
+            <section className="text-[#0F160F]">
+              <h3 className="text-lg font-bold mb-4">Approved Items</h3>
+              {approvedLoading ? (
+                <div className="flex justify-center items-center p-8">
+                  <p>Loading approved items...</p>
+                </div>
+              ) : approvedProducts?.length === 0 ? (
+                <div className="flex flex-col items-center w-full text-[rgb(15,22,15)]">
+                  <img src={emptyCart} alt="" />
+                  <p>No approved items yet</p>
                 </div>
               ) : (
-                <p>Product details not available.</p>
+                <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+                  {approvedProducts.map((product) => (
+                    <div key={product.id} className="border p-4 mb-4 rounded-lg shadow-md">
+                      <div>
+                        <img
+                          src={product?.image || "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"}
+                          alt={product?.name}
+                          className="w-full h-[200px] object-cover mb-4 rounded"
+                        />
+                        <p className="font-bold text-lg mb-2">{product?.name || "N/A"}</p>
+                        <p className="text-gray-600 mb-2">{product?.location || "Unknown location"}</p>
+                        <p className="flex justify-between my-4 font-bold">
+                          Price per kg: <span>{product?.price ? formatUnits(product.price) : "0.00"} U2U</span>
+                        </p>
+                        <p className="text-sm mb-4">
+                          Status: <span className="text-green-600 font-semibold">✓ Payment Approved</span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
-            </div>
-          );
-        }))}
-      </section> */}
+            </section>
           </TabPanel>
         </TabContext>
       </Box>

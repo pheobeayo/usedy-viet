@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ethers } from "ethers";
+import { useState, useEffect } from "react";
+import { ethers, formatUnits } from "ethers";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import useEditProduct from "../hooks/useEditProduct";
@@ -22,10 +22,20 @@ const style = {
   p: 4,
 };
 
-const EditProduct = ({ id }) => {
+const EditProduct = ({ id, productData }) => {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    // Populate form data when opening the modal
+    populateFormWithProductData();
+    setOpen(true);
+  };
+  const handleClose = () => {
+    // Reset to original data when closing
+    if (productData) {
+      populateFormWithProductData();
+    }
+    setOpen(false);
+  };
   const handleEdit = useEditProduct();
   const { uploadToPinata, isUploading } = usePinataUpload();
 
@@ -36,6 +46,22 @@ const EditProduct = ({ id }) => {
   const [productDesc, setProductDesc] = useState("");
   const [productPrice, setProductPrice] = useState("");
   const [error, setError] = useState("");
+
+  // Function to populate form with existing product data
+  const populateFormWithProductData = () => {
+    if (productData) {
+      setImageUrl(productData.image || "");
+      setProductName(productData.name || "");
+      setProductDesc(productData.product || ""); // 'product' field contains description
+      setProductWeight(productData.weight?.toString() || "");
+      setProductPrice(productData.price ? formatUnits(productData.price, 18) : "");
+    }
+  };
+
+  // Populate form when component mounts or productData changes
+  useEffect(() => {
+    populateFormWithProductData();
+  }, [productData]);
 
   const handleEditproduct = async () => {
     const amount = ethers.parseUnits(productPrice);
@@ -90,8 +116,11 @@ const EditProduct = ({ id }) => {
       >
         <Box sx={style}>
         <p className="font-bold text-[24px] text-center font-titiliumweb my-6">
-            Edit Product
+            Edit Product {productData?.name ? `- ${productData.name}` : ''}
           </p>
+          <div className="text-center mb-4 text-sm text-gray-300">
+            {productData ? 'Form pre-populated with current product data' : 'Loading product data...'}
+          </div>
           <label>Select a Product Image (Image URL (Below 1mb))</label>
           <div className="mb-4 w-full relative">
             {imageUrl ? (
@@ -147,11 +176,12 @@ const EditProduct = ({ id }) => {
               />
             )}
           </div>
+          <p className="mb-2">Product ID</p>
            <input
             type="text"
             value={id}
             readOnly
-            className="border mb-4 border-white/20 w-[100%] rounded-md hover:outline-0 p-3"
+            className="border mb-4 border-white/20 w-[100%] rounded-md hover:outline-0 p-3 bg-gray-600 cursor-not-allowed"
           />
           <p className="mb-2">Product Name</p>
           <input

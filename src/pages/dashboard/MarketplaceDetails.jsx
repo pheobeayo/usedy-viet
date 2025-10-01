@@ -6,6 +6,7 @@ import { formatUnits } from "ethers";
 import Banner from "../../components/Banner";
 import EditProduct from "../../components/EditProduct";
 import BuyProduct from "../../components/BuyProduct";
+import ProductBuyersInfo from "../../components/ProductBuyersInfo";
 import { useAppKitAccount } from "@reown/appkit/react";
 
 const MarketplaceDetails = () => {
@@ -58,7 +59,7 @@ const MarketplaceDetails = () => {
                 {formatUnits(transaction.price)} U2U(per unit of measure){" "}
               </p>
               <p className="flex justify-between my-4">
-                Quantity available: <span>{Number(transaction.weight)}</span>
+                Quantity available: <span className={Number(transaction.weight) === 0 ? 'text-red-500 font-bold' : ''}>{Number(transaction.weight) === 0 ? '0 (Out of Stock)' : Number(transaction.weight)}</span>
               </p>
               <p className="flex justify-between my-4">
                 Seller's location: <span>{transaction.location}</span>
@@ -71,10 +72,19 @@ const MarketplaceDetails = () => {
               {/* Action buttons section */}
               <div className="flex flex-col gap-3 my-6">
                 {transaction.address.toLowerCase() === address?.toLowerCase() ? (
-                  <EditProduct id={id} />
+                  <EditProduct id={id} productData={transaction} />
                 ) : (
                   <>
-                    <BuyProduct id={id} price={formatUnits(transaction.price)} />
+                    {Number(transaction.weight) === 0 ? (
+                      <button
+                        disabled
+                        className="bg-gray-400 text-gray-600 py-2 px-4 rounded-lg lg:text-[20px] md:text-[20px] font-bold text-[16px] w-[100%] my-2 cursor-not-allowed font-titiliumweb"
+                      >
+                        Out of Stock
+                      </button>
+                    ) : (
+                      <BuyProduct id={id} price={formatUnits(transaction.price)} />
+                    )}
                     <button
                       onClick={handleChatSeller}
                       className="bg-[#263E59] text-white py-2 px-4 rounded-lg lg:text-[20px] md:text-[20px] font-bold text-[16px] w-[100%] my-2 hover:bg-bg-ash hover:text-darkGrey hover:font-bold transition-colors duration-200 font-titiliumweb"
@@ -94,6 +104,14 @@ const MarketplaceDetails = () => {
               </p>
             </div>
           </section>
+
+          {/* Product Buyers Information - Only visible to the seller */}
+          {transaction.address.toLowerCase() === address?.toLowerCase() && (
+            <ProductBuyersInfo 
+              productId={id} 
+              productPrice={transaction.price}
+            />
+          )}
         </div>
       ) : (
         <div>
