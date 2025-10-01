@@ -6,8 +6,8 @@ import {
   useAppKitNetwork,
   useAppKitProvider,
 } from "@reown/appkit/react";
-import { toast } from "react-toastify";
-import { morphHolesky } from "@reown/appkit/networks";
+import { toast } from "react-toastify"
+import { ultraNebulaTestnet } from "../connection/index";
 import { ErrorDecoder } from "ethers-decode-error";
 import abi from "../constants/abi.json";
 import { ethers, Contract, formatUnits } from "ethers";
@@ -64,8 +64,8 @@ const BuyProduct = ({ id, price }) => {
         return;
       }
 
-      if (Number(chainId) !== Number(morphHolesky.id)) {
-        toast.error("You're not connected to Bsc Testnet");
+      if (Number(chainId) !== Number(ultraNebulaTestnet.id)) {
+        toast.error("You're not connected to ultraNebula Testnet network");
         return;
       }
 
