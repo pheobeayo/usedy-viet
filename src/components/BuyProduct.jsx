@@ -170,12 +170,12 @@ const BuyProduct = ({ id, price }) => {
               <div className="flex justify-between items-center">
                 <span className="text-white font-semibold">Total Amount:</span>
                 <span className="text-white font-bold text-lg">
-                  {totalAmount} ETH
+                  {totalAmount} U2U
                 </span>
               </div>
               {amount && Number(amount) > 0 && (
                 <div className="text-sm text-gray-300 mt-2">
-                  {amount} × {price} ETH = {totalAmount} ETH
+                  {amount} × {price} U2U = {totalAmount} U2U
                 </div>
               )}
             </div>
