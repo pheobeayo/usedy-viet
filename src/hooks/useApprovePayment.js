@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import useContractInstance from "./useContractInstance";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { toast } from "react-toastify";
-import { ultraNebulaTestnet } from "../connection/index";
+import { u2uSolarisMainnet } from "../connection/index";
 import { ErrorDecoder } from "ethers-decode-error";
 import abi from "../constants/abi.json";
 import { useProduct } from "../context/ContextProvider";
@@ -31,8 +31,8 @@ const useApprovePayment = () => {
         return;
       }
 
-      if (Number(chainId) !== Number(ultraNebulaTestnet.id)) {
-        toast.error("You're not connected to ultraNebulaTestnet network");
+      if (Number(chainId) !== Number(u2uSolarisMainnet.id)) {
+        toast.error("You're not connected to u2uSolarisMainnet network");
         return;
       }
 

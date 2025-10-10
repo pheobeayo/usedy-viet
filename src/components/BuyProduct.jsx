@@ -7,7 +7,7 @@ import {
   useAppKitProvider,
 } from "@reown/appkit/react";
 import { toast } from "react-toastify"
-import { ultraNebulaTestnet } from "../connection/index";
+import { u2uSolarisMainnet } from "../connection/index";
 import { ErrorDecoder } from "ethers-decode-error";
 import abi from "../constants/abi.json";
 import { ethers, Contract, formatUnits } from "ethers";
@@ -66,7 +66,7 @@ const BuyProduct = ({ id, price }) => {
         return;
       }
 
-      if (Number(chainId) !== Number(ultraNebulaTestnet.id)) {
+      if (Number(chainId) !== Number(u2uSolarisMainnet.id)) {
         toast.error("You're not connected to ultraNebula Testnet network");
         return;
       }

@@ -96,9 +96,9 @@ Usedy is committed to making recycling more accessible, rewarding, and environme
 With a decentralised marketplace functionality and blockchain technology to incentivise recycling and promote sustainable waste management. Usedy empowers individuals, businesses, and organisations to participate actively in the recycling ecosystem; hence, it encourages sustainable waste management practices and contributes to a greener, more eco-conscious world.
 
 ### Contract Deployed:
-UsedyToken deployed to 0x3D98a2f7dFdAB3c09A28e95f5e49f26be87f7f95
+UsedyToken deployed to 0x7FEa3580063ecA42958ebaB5e4035bEBB109dD12
 
-UsedyContract deployed to 0x25d3195984A693886103312eA3FA53D738c951B7
+UsedyContract deployed to 0x38b0917178b0C07bEAAf9c6255Ad97C1c9D984EE
 
 ### Demo Link:
 https://youtu.be/H6k5tT_kV0Y
